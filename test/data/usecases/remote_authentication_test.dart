@@ -113,4 +113,24 @@ void main() {
       expect(future, throwsA(DomainError.invalidCredentials));
     },
   );
+
+  // test(
+  //   'Should return AccountEntity if HttpClient returns 200',
+  //   () async {
+  //     when(
+  //       httpClient.request(
+  //         url: anyNamed('url'),
+  //         method: anyNamed('method'),
+  //         body: anyNamed('body'),
+  //       ),
+  //     ).thenAnswer((_) async => {
+  //           'accessToken': accessToken,
+  //           'name': faker.person.name(),
+  //         });
+
+  //     final account = await sut.auth(params);
+
+  //     expect(account.token);
+  //   },
+  // );
 }
