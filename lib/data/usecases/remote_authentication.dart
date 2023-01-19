@@ -25,9 +25,7 @@ class RemoteAuthentication {
 
       return AccountEntity.fromJson(httpResponse);
     } on HttpError catch (error) {
-      throw error == HttpError.unauthorized
-          ? DomainError.invalidCredentials
-          : DomainError.unexpected;
+      throw error == HttpError.unauthorized ? DomainError.invalidCredentials : DomainError.unexpected;
     }
   }
 }
@@ -41,10 +39,9 @@ class RemoteAuthenticationParams {
     @required this.password,
   });
 
-  factory RemoteAuthenticationParams.fromDomain(AuthenticationParams entity) =>
-      RemoteAuthenticationParams(
-        email: entity.email,
-        password: entity.secret,
+  factory RemoteAuthenticationParams.fromDomain(AuthenticationParams params) => RemoteAuthenticationParams(
+        email: params.email,
+        password: params.secret,
       );
 
   Map toJson() => {
