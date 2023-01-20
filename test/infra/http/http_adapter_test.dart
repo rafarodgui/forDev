@@ -13,7 +13,11 @@ class HttpAdapter {
     @required String url,
     @required String method,
   }) async {
-    await client.post(Uri.parse(url));
+    final headers = {
+      'content-type': 'aplication/json',
+      'accept': 'aplication/json',
+    };
+    await client.post(Uri.parse(url), headers: headers);
   }
 }
 
@@ -31,6 +35,23 @@ void main() {
 
       verify(client.post(
         Uri.parse(url),
+      ));
+    });
+
+    test('shoul call post with correct headers', () async {
+      final client = ClientSpy();
+      final sut = HttpAdapter(client);
+      final url = faker.internet.httpUrl();
+
+      //action
+      await sut.request(url: url, method: 'post');
+
+      verify(client.post(
+        Uri.parse(url),
+        headers: {
+          'content-type': 'aplication/json',
+          'accept': 'aplication/json',
+        },
       ));
     });
   });
