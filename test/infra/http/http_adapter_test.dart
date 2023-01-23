@@ -1,34 +1,9 @@
-import 'dart:convert';
-
 import 'package:faker/faker.dart';
-import 'package:fordev/data/http/http_client.dart';
 import 'package:http/http.dart';
-import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
-import 'package:meta/meta.dart';
+import 'package:test/test.dart';
 
-class HttpAdapter implements HttpClient {
-  final Client client;
-
-  HttpAdapter(this.client);
-
-  Future<Map> request({
-    @required String url,
-    @required String method,
-    Map body,
-  }) async {
-    final headers = {
-      'content-type': 'aplication/json',
-      'accept': 'aplication/json',
-    };
-    final verifyBodyExists = body != null ? jsonEncode(body) : null;
-    final response = await client.post(Uri.parse(url), headers: headers, body: verifyBodyExists);
-
-    if (response.statusCode == 204) return null;
-
-    return response.body.isEmpty ? null : jsonDecode(response.body);
-  }
-}
+import 'package:fordev/infra/http/http.dart';
 
 class ClientSpy extends Mock implements Client {}
 
