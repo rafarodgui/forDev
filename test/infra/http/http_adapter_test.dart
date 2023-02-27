@@ -39,27 +39,17 @@ void main() {
     test('shoul call post with correct values', () async {
       await sut.request(url: url, method: 'post', body: {'any_key': 'any_value'});
 
-      verify(
-        client.post(
-          Uri.parse(url),
-          headers: {
-            'content-type': 'aplication/json',
-            'accept': 'aplication/json',
-          },
-          body: '{"any_key":"any_value"}',
-        ),
-      );
+      verify(client.post(
+        Uri.parse(url),
+        headers: {'content-type': 'aplication/json', 'accept': 'aplication/json'},
+        body: '{"any_key":"any_value"}',
+      ));
     });
 
     test('shoul call post without body', () async {
       await sut.request(url: url, method: 'post');
 
-      verify(
-        client.post(
-          any,
-          headers: anyNamed('headers'),
-        ),
-      );
+      verify(client.post(any, headers: anyNamed('headers')));
     });
 
     test('should return data if post return 200', () async {
@@ -94,6 +84,14 @@ void main() {
 
     test('shoul return BadRequest error if post retuns 400', () async {
       mockResponse(400);
+
+      final future = sut.request(url: url, method: 'post');
+
+      expect(future, throwsA(HttpError.badRequest));
+    });
+
+    test('shoul return BadRequest error if post retuns 400 without body', () async {
+      mockResponse(400, body: '');
 
       final future = sut.request(url: url, method: 'post');
 
