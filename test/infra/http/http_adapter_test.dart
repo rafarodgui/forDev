@@ -90,6 +90,15 @@ void main() {
       expect(response, null);
     });
 
+    test('should return BadRequest error if post retuns 400 without body',
+        () async {
+      mockResponse(400, body: '');
+
+      final future = sut.request(url: url, method: 'post');
+
+      expect(future, throwsA(HttpError.badRequest));
+    });
+
     test('shoul return BadRequest error if post retuns 400', () async {
       mockResponse(400);
 
@@ -98,13 +107,12 @@ void main() {
       expect(future, throwsA(HttpError.badRequest));
     });
 
-    test('shoul return BadRequest error if post retuns 400 without body',
-        () async {
-      mockResponse(400, body: '');
+    test('shoul return ServerError error if post retuns 500', () async {
+      mockResponse(500);
 
       final future = sut.request(url: url, method: 'post');
 
-      expect(future, throwsA(HttpError.badRequest));
+      expect(future, throwsA(HttpError.serverError));
     });
   });
 }
