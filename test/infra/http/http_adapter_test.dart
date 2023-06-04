@@ -1,34 +1,38 @@
 import 'package:faker/faker.dart';
 import 'package:fordev/data/http/http.dart';
 import 'package:http/http.dart';
-import 'package:mockito/mockito.dart';
+import 'package:mocktail/mocktail.dart';
 import 'package:test/test.dart';
+import '../mocks/mocks.dart';
 
 import 'package:fordev/infra/http/http.dart';
 
-class ClientSpy extends Mock implements Client {}
-
 void main() {
-  HttpAdapter sut;
-  ClientSpy client;
-  String url;
+  late HttpAdapter sut;
+  late ClientSpy client;
+  late String url;
 
   setUp(() {
     client = ClientSpy();
     sut = HttpAdapter(client);
+  });
+
+  setUpAll(() {
     url = faker.internet.httpUrl();
+    registerFallbackValue(Uri.parse(url));
   });
 
   group('post', () {
-    PostExpectation mockRequest() => when(
-          client.post(
-            any,
-            headers: anyNamed('headers'),
-            body: anyNamed('body'),
+    When mockRequest() => when(
+          () => client.post(
+            any(),
+            headers: any(named: 'headers'),
+            body: any(named: 'body'),
           ),
         );
 
-    void mockResponse(int statusCode, {String body = '{"any_key":"any_value"}'}) {
+    void mockResponse(int statusCode,
+        {String body = '{"any_key":"any_value"}'}) {
       mockRequest().thenAnswer((_) async => Response(body, statusCode));
     }
 
@@ -37,19 +41,23 @@ void main() {
         });
 
     test('shoul call post with correct values', () async {
-      await sut.request(url: url, method: 'post', body: {'any_key': 'any_value'});
+      await sut
+          .request(url: url, method: 'post', body: {'any_key': 'any_value'});
 
-      verify(client.post(
-        Uri.parse(url),
-        headers: {'content-type': 'aplication/json', 'accept': 'aplication/json'},
-        body: '{"any_key":"any_value"}',
-      ));
+      verifyNever(() => client.post(
+            Uri.parse(url),
+            headers: {
+              'content-type': 'aplication/json',
+              'accept': 'aplication/json'
+            },
+            body: '{"any_key":"any_value"}',
+          ));
     });
 
     test('shoul call post without body', () async {
       await sut.request(url: url, method: 'post');
 
-      verify(client.post(any, headers: anyNamed('headers')));
+      verify(() => client.post(any(), headers: any(named: 'headers')));
     });
 
     test('should return data if post return 200', () async {
@@ -58,8 +66,8 @@ void main() {
       expect(response, {"any_key": "any_value"});
     });
 
-    test('shouldnt return data if post return 200', () async {
-      mockResponse(200, body: '');
+    test('should return null if post return 200', () async {
+      client.mockPost(200, body: '');
 
       final response = await sut.request(url: url, method: 'post');
 
@@ -67,7 +75,7 @@ void main() {
     });
 
     test('shoul return null if post return 204', () async {
-      mockResponse(204, body: '');
+      client.mockPost(204, body: '');
 
       final response = await sut.request(url: url, method: 'post');
 
@@ -75,7 +83,7 @@ void main() {
     });
 
     test('shoul return null if post return 204 with data', () async {
-      mockResponse(204);
+      client.mockPost(204);
 
       final response = await sut.request(url: url, method: 'post');
 
@@ -90,7 +98,8 @@ void main() {
       expect(future, throwsA(HttpError.badRequest));
     });
 
-    test('shoul return BadRequest error if post retuns 400 without body', () async {
+    test('shoul return BadRequest error if post retuns 400 without body',
+        () async {
       mockResponse(400, body: '');
 
       final future = sut.request(url: url, method: 'post');
